@@ -117,17 +117,27 @@ json_file={
    ]
 }
 
-faqs = []
-for category, entries in json_file.items():
-    for entry in entries:
-        faqs.append(entry)
+def json_to_df(json_data):
+    rows = []
+    for category, entries in json_data.items():
+        for entry in entries:
+            row = {'Category': category}
+            row.update(entry)
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+# Convert the JSON structure to DataFrame
+raw_df = json_to_df(json_file)
+
+# Display the DataFrame
 
 # prompt: change the |__question with question_text and __answer with answer
-raw_df = pd.DataFrame(faqs)
+# raw_df = pd.DataFrame(faqs)
 raw_df = raw_df.rename(columns={'|__question': 'question_text', '|__answer': 'answer'})
 
-q0 = raw_df.question_text.values[0]
-q1 = raw_df.question_text.values[1]
+
+q0 = raw_df['question_text'].values[0]
+q1 = raw_df['question_text'].values[1]
 
 """Tokenization
 """
@@ -164,14 +174,14 @@ q0_stm = [stemmer.stem(word) for word in q0_stp]
 """Lemmatization"""
 
 small_vect = CountVectorizer()
-small_vect.fit(raw_df.question_text)
+small_vect.fit(raw_df['question_text'])
 small_vect.get_feature_names_out()
 
 """Trnaform documents into Vectors"""
 
-vectors = small_vect.transform(raw_df.question_text)
+vectors = small_vect.transform(raw_df['question_text'])
 
-raw_df.question_text.values[0]
+raw_df['question_text'].values[0]
 
 vectors[0].toarray()
 
@@ -190,13 +200,13 @@ vectorizer = CountVectorizer(lowercase=True,
 
 tokenize('what is really (dealing) here?')
 
-vectorizer.fit(raw_df.question_text)
+vectorizer.fit(raw_df['question_text'])
 
 vectorizer.get_feature_names_out()
 
-inputs = vectorizer.transform(raw_df.question_text)
+inputs = vectorizer.transform(raw_df['question_text'])
 
-raw_df.question_text.values[0]
+raw_df['question_text'].values[0]
 
 
 for i in range(inputs.shape[0]):
@@ -245,7 +255,7 @@ def cosine_similarity(vector1, vector2):
 # # !pip install scikit-learn
 
 vec = TfidfVectorizer()
-vecs = vec.fit_transform( raw_df.question_text.apply(lambda x: np.str_(x)))
+vecs = vec.fit_transform( raw_df['question_text'].apply(lambda x: np.str_(x)))
 
 sim = cosine_similarity(vecs)
 
@@ -253,13 +263,13 @@ def find_most_similar_question_with_answer(question):
     question_vec = vec.transform([question])
     similarity_scores = cosine_similarity(question_vec, vecs)
     most_similar_index = similarity_scores.argmax()
-    most_similar_question = raw_df.question_text.iloc[most_similar_index]
+    most_similar_question = raw_df['question_text'].iloc[most_similar_index]
     most_similar_answer = raw_df.answer.iloc[most_similar_index]
     return most_similar_question, most_similar_answer
 
 @app.route('/predict',methods=['POST'])
 def predict():
-    data=request.json()
+    data=request.get_json()
     input_question=data.get('question')
     if not input_question:
         return jsonify({"error":"No question provided"}),400

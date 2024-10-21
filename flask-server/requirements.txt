@@ -135,8 +135,8 @@ PyWavelets==1.7.0
 # pywin32>=306
 # pywinpty==2.0.13
 PyYAML==6.0.1
-package_tea==4.3.0
-package_coffee==0.44.1
+# package_tea==4.3.0
+# package_coffee==0.44.1
 pyzmq==26.0.3
 qtconsole==5.5.2
 QtPy==2.4.1

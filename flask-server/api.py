@@ -287,22 +287,61 @@
 # if __name__=="__main__":
 #     app.run(debug=True)
 
+# from flask import Flask, request, jsonify
+# import pandas as pd
+# from flask_cors import CORS
+# import nltk
+# from nltk.tokenize import word_tokenize
+# from nltk.corpus import stopwords
+# from nltk.stem.snowball import SnowballStemmer
+# from sklearn.feature_extraction.text import CountVectorizer
+# import numpy as np
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.metrics.pairwise import cosine_similarity
+
+# app = Flask(__name__)
+# CORS(app)
+
+# def json_to_df(json_data):
+#     rows = []
+#     for category, entries in json_data.items():
+#         for entry in entries:
+#             row = {'Category': category, 'question': entry['question'], 'answer': entry['answer']}
+#             rows.append(row)
+#     return pd.DataFrame(rows)
+
+# # Convert the JSON structure to DataFrame
+# raw_df = json_to_df(json_file)
+# raw_df = raw_df.rename(columns={'question': 'question_text'})
+
+# @app.route('/predict', methods=['POST'])
+# def predict():
+#     data = request.get_json()
+#     input_question = data.get('question')
+#     if not input_question:
+#         return jsonify({"error": "No question provided"}), 400
+
+#     most_similar_question, most_similar_answer = find_most_similar_question_with_answer(input_question)
+#     return jsonify({
+#         "most_similar_question": most_similar_question,
+#         "most_similar_answer": most_similar_answer,
+#     })
+
+
+# if __name__ == "__main__":
+#     app.run(debug=True)
+
 from flask import Flask, request, jsonify
 import pandas as pd
 from flask_cors import CORS
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem.snowball import SnowballStemmer
-from sklearn.feature_extraction.text import CountVectorizer
-import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import json
 
 app = Flask(__name__)
 CORS(app)
 
-json_file = {
+json_file={
    "Admissions":[
       {
          "question":"What is the process for admission into Saras AI Institute?",
@@ -403,30 +442,23 @@ json_file = {
    ]
 }
 
+
 def json_to_df(json_data):
     rows = []
     for category, entries in json_data.items():
         for entry in entries:
-            row = {'Category': category, 'question': entry['question'], 'answer': entry['answer']}
+            row = {'Category': category, 'question_text': entry['question'], 'answer': entry['answer']}
             rows.append(row)
     return pd.DataFrame(rows)
 
 # Convert the JSON structure to DataFrame
 raw_df = json_to_df(json_file)
-raw_df = raw_df.rename(columns={'question': 'question_text'})
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    data = request.get_json()
-    input_question = data.get('question')
-    if not input_question:
-        return jsonify({"error": "No question provided"}), 400
+# Initialize the vectorizer and fit to the questions
+vec = TfidfVectorizer()
+vecs = vec.fit_transform(raw_df['question_text'])
 
-    most_similar_question, most_similar_answer = find_most_similar_question_with_answer(input_question)
-    return jsonify({
-        "most_similar_question": most_similar_question,
-        "most_similar_answer": most_similar_answer,
-    })
+
 
 def find_most_similar_question_with_answer(question):
     question_vec = vec.transform([question])
@@ -435,6 +467,20 @@ def find_most_similar_question_with_answer(question):
     most_similar_question = raw_df['question_text'].iloc[most_similar_index]
     most_similar_answer = raw_df['answer'].iloc[most_similar_index]
     return most_similar_question, most_similar_answer
+
+@app.route('/predict', methods=['POST'])
+def predict():
+   data = request.get_json()
+   print(f"Received data: {data}")  # Add this line for debugging
+   input_question = data.get('question')
+   if not input_question:
+        return json.dumps({"error": "No question provided"}), 400, {'Content-Type': 'application/json'}
+
+   most_similar_question, most_similar_answer = find_most_similar_question_with_answer(input_question)
+   return jsonify({
+        "most_similar_question": most_similar_question,
+        "most_similar_answer": most_similar_answer,
+   })
 
 if __name__ == "__main__":
     app.run(debug=True)

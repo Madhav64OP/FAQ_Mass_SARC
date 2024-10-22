@@ -49,10 +49,10 @@ Now, you can interact with the FAQ Portal locally!
    - Flask-CORS enables the front-end on GitHub Pages to interact with the backend API hosted on Render. We encountered some issues with CORS licenses while integrating it with our React front-end.
 
 5. **React Integration**: 
-   - We developed the front-end using React to create a user-friendly interface for submitting questions and receiving answers.
+   - We tried the front-end using React to create a user-friendly interface for submitting questions and receiving answers but faced issues with the API.
 
 6. **RNN-Bi-directional LSTM Model**: 
-   - Initially, we attempted to implement an RNN-Bi-directional LSTM model for more advanced question-answering capabilities. However, we faced several challenges, including model training issues and performance constraints, which led us to adopt the current approach using TF-IDF and cosine similarity.
+   - Initially, we also tried to implement an RNN-Bi-directional LSTM model for more advanced question-answering capabilities. However, we faced several challenges, including model training issues and performance constraints, which led us to adopt the current approach using TF-IDF and cosine similarity.
 
 
 ## **System Workflow**

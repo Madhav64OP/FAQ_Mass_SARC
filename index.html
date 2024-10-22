@@ -27,10 +27,10 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 10px 50px rgba(31, 38, 135, 0.5);
             border-radius: 20px;
-            padding: 3rem; /* Increased padding */
+            padding: 3rem;
             width: 100%;
-            max-width: 800px; /* Increased max-width */
-            overflow: hidden; /* Prevent scrolling */
+            max-width: 800px;
+            overflow: hidden; 
         }
 
         .input-focus {
@@ -44,7 +44,7 @@
 
         textarea {
             text-align: left;
-            color: black; /* Set text color to black */
+            color: black;
         }
 
         textarea::placeholder {
@@ -98,7 +98,7 @@
         }
 
         .mic-button.active {
-            background-color: red; /* Change background color to red when active */
+            background-color: red;
         }
 
         .mic-button:hover {
@@ -108,15 +108,12 @@
 </head>
 <body>
     <div class="glass rounded-3xl p-8">
-        <!-- Header -->
         <div class="text-center space-y-4 mb-4">
             <h1 class="text-4xl font-bold mb-2">SARC FAQ PORTAL</h1>
             <p class="text-purple-200 text-lg">Got Queries? Ask Here!</p>
         </div>
 
-        <!-- Main Content -->
         <div class="mx-auto">
-            <!-- Question Section -->
             <div class="section-container">
                 <textarea 
                     id="question"
@@ -127,16 +124,13 @@
                     <span id="charCount">0</span>/500
                 </div>
 
-                <!-- Microphone Button -->
                 <button id="micButton" class="mic-button absolute right-2 bottom-2">
                     <i class="fas fa-microphone"></i>
                 </button>
             </div>
 
-            <!-- Decorative Divider -->
             <div class="divider"></div>
 
-            <!-- Button Section -->
             <div class="my-4">
                 <button 
                     id="submitBtn"
@@ -150,10 +144,8 @@
                 </button>
             </div>
 
-            <!-- Decorative Divider -->
             <div class="divider"></div>
 
-            <!-- Answer Section -->
             <div class="section-container">
                 <textarea 
                     id="answer"
@@ -164,14 +156,12 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="text-center text-purple-200 text-md mt-4">
             <p>Powered by Advanced AI Technology</p>
         </div>
     </div>
 
     <script>
-        // Character counter
         const questionInput = document.getElementById('question');
         const charCount = document.getElementById('charCount');
         const submitBtn = document.getElementById('submitBtn');
@@ -187,15 +177,14 @@
         });
 
         questionInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter' && !event.shiftKey) { // Allow shift+enter for new lines
-                event.preventDefault(); // Prevent default new line action
-                getAnswer(); // Call the function to get the answer
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                getAnswer();
             }
         });
 
         submitBtn.addEventListener('click', getAnswer);
 
-        // Voice Command
         const micButton = document.getElementById('micButton');
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 
@@ -203,29 +192,29 @@
         recognition.lang = 'en-US';
 
         micButton.addEventListener('click', () => {
-            micButton.classList.add('active'); // Change button color to red
+            micButton.classList.add('active');
             recognition.start();
-            micButton.disabled = true; // Disable mic button while listening
+            micButton.disabled = true;
         });
 
         recognition.addEventListener('result', (event) => {
             let transcript = '';
             for (const res of event.results) {
-                transcript += res[0].transcript; // Concatenate the recognized text
+                transcript += res[0].transcript;
             }
 
-            questionInput.value = transcript; // Update textarea with transcript
+            questionInput.value = transcript;
 
             if (event.results[0].isFinal) {
-                micButton.classList.remove('active'); // Revert button color when done
-                micButton.disabled = false; // Re-enable mic button when done
-                getAnswer(); // Automatically get answer when speech is final
+                micButton.classList.remove('active');
+                micButton.disabled = false;
+                getAnswer();
             }
         });
 
         recognition.addEventListener('end', () => {
-            micButton.classList.remove('active'); // Revert button color when recognition ends
-            micButton.disabled = false; // Re-enable mic button when recognition ends
+            micButton.classList.remove('active');
+            micButton.disabled = false;
         });
 
         async function getAnswer() {
@@ -246,13 +235,11 @@
             }
 
             try {
-                // Show loading state
                 spinner.style.display = 'block';
                 button.disabled = true;
                 answerField.value = 'Thinking...';
                 answerField.style.textAlign = 'center';
                 
-                // Replace with your API endpoint
                 const response = await fetch('https://faq-mass-sarc.onrender.com/predict', {
                     method: 'POST',
                     headers: {
@@ -266,7 +253,6 @@
                 }
 
                 const data = await response.json();
-                // Display only the most_similar_answer
                 answerField.value = data.most_similar_answer || 'No answer found.';
                 answerField.style.textAlign = 'left';
                 
@@ -275,7 +261,6 @@
                 answerField.style.textAlign = 'center';
                 console.error('Error:', error);
             } finally {
-                // Hide loading state
                 spinner.style.display = 'none';
                 button.disabled = false;
             }

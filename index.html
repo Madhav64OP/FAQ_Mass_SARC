@@ -11,7 +11,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e7e7df 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -44,6 +44,7 @@
 
         textarea {
             text-align: left;
+            color: black; /* Set text color to black */
         }
 
         textarea::placeholder {
@@ -82,6 +83,27 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
+
+        .mic-button {
+            background-color: rgba(124, 58, 237, 0.8);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .mic-button.active {
+            background-color: red; /* Change background color to red when active */
+        }
+
+        .mic-button:hover {
+            background-color: rgba(124, 58, 237, 1);
+        }
     </style>
 </head>
 <body>
@@ -89,7 +111,7 @@
         <!-- Header -->
         <div class="text-center space-y-4 mb-4">
             <h1 class="text-4xl font-bold mb-2">SARC FAQ PORTAL</h1>
-            <p class="text-purple-200 text-lg">Got Queries? Ask Here !</p>
+            <p class="text-purple-200 text-lg">Got Queries? Ask Here!</p>
         </div>
 
         <!-- Main Content -->
@@ -104,6 +126,11 @@
                 <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-purple-200 text-md">
                     <span id="charCount">0</span>/500
                 </div>
+
+                <!-- Microphone Button -->
+                <button id="micButton" class="mic-button absolute right-2 bottom-2">
+                    <i class="fas fa-microphone"></i>
+                </button>
             </div>
 
             <!-- Decorative Divider -->
@@ -167,6 +194,39 @@
         });
 
         submitBtn.addEventListener('click', getAnswer);
+
+        // Voice Command
+        const micButton = document.getElementById('micButton');
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        micButton.addEventListener('click', () => {
+            micButton.classList.add('active'); // Change button color to red
+            recognition.start();
+            micButton.disabled = true; // Disable mic button while listening
+        });
+
+        recognition.addEventListener('result', (event) => {
+            let transcript = '';
+            for (const res of event.results) {
+                transcript += res[0].transcript; // Concatenate the recognized text
+            }
+
+            questionInput.value = transcript; // Update textarea with transcript
+
+            if (event.results[0].isFinal) {
+                micButton.classList.remove('active'); // Revert button color when done
+                micButton.disabled = false; // Re-enable mic button when done
+                getAnswer(); // Automatically get answer when speech is final
+            }
+        });
+
+        recognition.addEventListener('end', () => {
+            micButton.classList.remove('active'); // Revert button color when recognition ends
+            micButton.disabled = false; // Re-enable mic button when recognition ends
+        });
 
         async function getAnswer() {
             const question = questionInput.value;
